@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sherief — UGC Creator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #080a14;
+      --surface: rgba(8,12,28,0.85);
+      --border: rgba(0,229,255,0.12);
+      --accent: #00E5FF;
+      --accent2: #9333EA;
+      --text: #E0E8F0;
+      --muted: #64748B;
+      --gold: #F59E0B;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    .bg-grid {
+      position: fixed;
+      inset: 0;
+      background-image: linear-gradient(rgba(0,229,255,0.03) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(0,229,255,0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .noise {
+      position: fixed;
+      inset: 0;
+      opacity: 0.025;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      flex-direction: column;
+      justify-content: center;
+      text-align: center;
+      padding: 80px 0;
+    }
+
+    .hero-video-wrap {
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 2px solid var(--accent);
+      box-shadow: 0 0 40px rgba(0,229,255,0.25);
+      margin: 0 auto 32px;
+      background: #111;
+    }
+
+    .hero-video-wrap video,
+    .hero-video-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      background: rgba(0,229,255,0.08);
+      border: 1px solid rgba(0,229,255,0.2);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+
+    .hero-badge .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 6px var(--accent);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .hero h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(36px, 7vw, 72px);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .hero h1 span {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero .tagline {
+      font-size: 18px;
+      color: var(--muted);
+      margin-bottom: 32px;
+      font-weight: 500;
+    }
+
+    .hero-platforms {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 40px;
+    }
+
+    .platform-chip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 8px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .platform-chip .handle {
+      color: var(--accent);
+      font-family: 'Space Grotesk', monospace;
+    }
+
+    .cta-row {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 28px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s ease;
+      letter-spacing: 0.02em;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #000;
+    }
+
+    .btn-primary:hover {
+      background: #33eeff;
+      box-shadow: 0 0 20px rgba(0,229,255,0.35);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(0,229,255,0.08);
+    }
+
+    /* ── STATS ── */
+    .stats-section {
+      padding: 80px 0;
+      border-top: 1px solid var(--border);
+    }
+
+    .stats-label {
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 28px;
+      text-align: center;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    @media (max-width: 640px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .stat-card .value {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--accent);
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+
+    .stat-card .label {
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 600;
+    }
+
+    /* ── NICHE ── */
+    .niche-section {
+      padding: 0 0 80px;
+    }
+
+    .section-label {
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+
+    .niche-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    @media (max-width: 640px) {
+      .niche-grid { grid-template-columns: 1fr; }
+    }
+
+    .niche-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 28px 20px;
+      text-align: center;
+    }
+
+    .niche-card .emoji {
+      font-size: 32px;
+      margin-bottom: 12px;
+    }
+
+    .niche-card h3 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .niche-card p {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    /* ── DEMO REEL ── */
+    .demo-section {
+      padding: 0 0 80px;
+    }
+
+    .demo-section .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 28px;
+    }
+
+    .demo-section h2 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 28px;
+      font-weight: 800;
+    }
+
+    .demo-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    @media (max-width: 640px) {
+      .demo-grid { grid-template-columns: 1fr; }
+    }
+
+    .demo-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      aspect-ratio: 9/16;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .demo-card .demo-thumb {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      position: absolute;
+      inset: 0;
+    }
+
+    .demo-card .play-icon {
+      position: relative;
+      z-index: 1;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: rgba(0,229,255,0.15);
+      border: 2px solid var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      color: var(--accent);
+      backdrop-filter: blur(8px);
+    }
+
+    .demo-card .platform-tag {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      padding: 4px 8px;
+      border-radius: 6px;
+      background: rgba(0,0,0,0.6);
+      font-size: 10px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 0.05em;
+      z-index: 2;
+    }
+
+    /* ── SERVICES ── */
+    .services-section {
+      padding: 0 0 80px;
+    }
+
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    @media (max-width: 640px) {
+      .services-grid { grid-template-columns: 1fr; }
+    }
+
+    .service-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .service-card .svc-tag {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 10px;
+    }
+
+    .service-card h3 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .service-card p {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .service-card .price {
+      margin-top: 14px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--accent);
+    }
+
+    .service-card .price-note {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 400;
+    }
+
+    /* ── RATE CARD ── */
+    .rate-section {
+      padding: 0 0 80px;
+    }
+
+    .rate-card {
+      background: linear-gradient(135deg, rgba(0,229,255,0.06), rgba(147,51,234,0.06));
+      border: 1px solid rgba(0,229,255,0.2);
+      border-radius: 16px;
+      padding: 40px;
+      text-align: center;
+    }
+
+    .rate-card h2 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 28px;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+
+    .rate-card .subtitle {
+      color: var(--muted);
+      font-size: 14px;
+      margin-bottom: 32px;
+    }
+
+    .rate-items {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+
+    .rate-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 20px;
+      background: var(--surface);
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+
+    .rate-item .name {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .rate-item .price {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--accent);
+    }
+
+    /* ── CONTACT ── */
+    .contact-section {
+      padding: 0 0 100px;
+    }
+
+    .contact-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 48px;
+      text-align: center;
+    }
+
+    .contact-card h2 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 28px;
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+
+    .contact-card p {
+      color: var(--muted);
+      font-size: 15px;
+      margin-bottom: 32px;
+    }
+
+    .contact-email {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 16px 32px;
+      background: rgba(0,229,255,0.06);
+      border: 1px solid rgba(0,229,255,0.2);
+      border-radius: 10px;
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--accent);
+      text-decoration: none;
+      font-family: 'Space Grotesk', monospace;
+    }
+
+    .contact-email:hover {
+      background: rgba(0,229,255,0.1);
+    }
+
+    /* ── FOOTER ── */
+    .footer {
+      border-top: 1px solid var(--border);
+      padding: 24px 0;
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    /* ── SMOOTH SCROLL ── */
+    html { scroll-behavior: smooth; }
+  </style>
+</head>
+<body>
+
+<div class="bg-grid"></div>
+<div class="noise"></div>
+
+<!-- ── HERO ── -->
+<section class="hero" id="home">
+  <div class="container">
+    <div class="hero-video-wrap">
+      <video autoplay muted loop playsinline poster="/assets/avatar-poster.jpg">
+        <source src="https://files2.heygen.ai/aws_pacific/avatar_tmp/f400b8eb1a484e71a6b2732abdf1d6e8/e15a84c9a09b446fbca6827d044578f5.mp4?Expires=1777834196&Signature=cYpcsCb0M3lCmfBbR-hd2ceit~ECyKNJJ~GFP-E3CLDo5Kj3gmktVBF7zNqNTlVW~Upx1zOrwOFMYA3ux603tG6YEmQMpIcE8xRcUryGQCkxc6DoSZ2IkkVNjSoZF0MH5J4G0OSRe2ZohdyOXoyQUIwcc~jP3phvAjd-ISI8zmV7btONPuY5F2VPpfcf7dlZgzd2g7iqKAvNlEEsZXw016DreM92k6gHo00lMGPADrDfbKgnuTWnX9eD0VcybQyiXnP5OGOxgSRG8rZCBD9ThyxYAdG4CtxxJ46W1984vQuTrAw1sUvMGA1FGZ8kZeBXdGXk9fCwqQk-Y8VncXo3IQ__&Key-Pair-Id=K38HBHX5LX3X2H" type="video/mp4" />
+      </video>
+    </div>
+
+    <div class="hero-badge">
+      <span class="dot"></span>
+      Open for UGC partnerships
+    </div>
+
+    <h1>I'm <span>Sherief</span></h1>
+    <p class="tagline">UGC Creator · AI-Powered Video Production · Tech · Travel · Food</p>
+
+    <div class="hero-platforms">
+      <div class="platform-chip">
+        <span>📱</span>
+        TikTok <span class="handle">@nowornevertypeoftime</span>
+      </div>
+    </div>
+
+    <div class="cta-row">
+      <a href="#contact" class="btn btn-primary">📩 Work With Me</a>
+      <a href="#work" class="btn btn-secondary">🎬 View My Work</a>
+    </div>
+  </div>
+</section>
+
+<!-- ── STATS ── -->
+<section class="stats-section">
+  <div class="container">
+    <div class="stats-label">Creator Stats</div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="value">955</div>
+        <div class="label">Followers</div>
+      </div>
+      <div class="stat-card">
+        <div class="value">3</div>
+        <div class="label">Niches</div>
+      </div>
+      <div class="stat-card">
+        <div class="value">AI</div>
+        <div class="label">Production</div>
+      </div>
+      <div class="stat-card">
+        <div class="value">24h</div>
+        <div class="label">Turnaround</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── NICHE ── -->
+<section class="niche-section">
+  <div class="container">
+    <div class="section-label">What I Create</div>
+    <div class="niche-grid">
+      <div class="niche-card">
+        <div class="emoji">📱</div>
+        <h3>Tech</h3>
+        <p>Unboxing, setup tours, gadget reviews, app tutorials. Authentic tech content that converts.</p>
+      </div>
+      <div class="niche-card">
+        <div class="emoji">✈️</div>
+        <h3>Travel</h3>
+        <p>Destination vlogs, packing tips, travel gear tours. Content that makes people book trips.</p>
+      </div>
+      <div class="niche-card">
+        <div class="emoji">🍔</div>
+        <h3>Food</h3>
+        <p>Food reviews, recipe recreations, restaurant tours. Food content that goes viral.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── DEMO WORK ── -->
+<section class="demo-section" id="work">
+  <div class="container">
+    <div class="demo-section section-header">
+      <h2>Sample Work</h2>
+      <div class="platform-chip">
+        <span>📱</span>
+        TikTok: <span class="handle">@nowornevertypeoftime</span>
+      </div>
+    </div>
+
+    <div class="demo-grid">
+      <div class="demo-card">
+        <span class="platform-tag">TikTok</span>
+        <div class="play-icon">▶</div>
+        <p style="position:absolute;bottom:12px;left:0;right:0;text-align:center;font-size:11px;color:var(--muted);z-index:2">Tech content sample</p>
+      </div>
+      <div class="demo-card">
+        <span class="platform-tag">TikTok</span>
+        <div class="play-icon">▶</div>
+        <p style="position:absolute;bottom:12px;left:0;right:0;text-align:center;font-size:11px;color:var(--muted);z-index:2">Travel content sample</p>
+      </div>
+      <div class="demo-card">
+        <span class="platform-tag">TikTok</span>
+        <div class="play-icon">▶</div>
+        <p style="position:absolute;bottom:12px;left:0;right:0;text-align:center;font-size:11px;color:var(--muted);z-index:2">Food content sample</p>
+      </div>
+    </div>
+
+    <p style="text-align:center;color:var(--muted);font-size:13px;margin-top:20px">
+      Follow <strong style="color:var(--accent)">@nowornevertypeoftime</strong> on TikTok for full content archive →
+    </p>
+  </div>
+</section>
+
+<!-- ── SERVICES ── -->
+<section class="services-section">
+  <div class="container">
+    <div class="section-label">What I Offer Brands</div>
+    <div class="services-grid">
+      <div class="service-card">
+        <div class="svc-tag">Most Popular</div>
+        <h3>UGC Video (60-90 sec)</h3>
+        <p>One polished, brand-focused video for your product. Delivered in 24h. Includes 2 revision rounds. Authentic creator-style content — not a scripted ad.</p>
+        <div class="price">$150 <span class="price-note">per video</span></div>
+      </div>
+      <div class="service-card">
+        <div class="svc-tag">High Volume</div>
+        <h3>3-Video UGC Pack</h3>
+        <p>Three videos from one shoot, optimized for different hooks/captions. Perfect for launching a product or running a campaign.</p>
+        <div class="price">$350 <span class="price-note">per pack</span></div>
+      </div>
+      <div class="service-card">
+        <div class="svc-tag">Full Campaign</div>
+        <h3>30-Day UGC Partnership</h3>
+        <p>4 videos/month + story reposts + priority availability. We build a real relationship with your product and audience.</p>
+        <div class="price">$500 <span class="price-note">/month</span></div>
+      </div>
+      <div class="service-card">
+        <div class="svc-tag">Fast Track</div>
+        <h3>Custom UGC Request</h3>
+        <p>Anything outside the box — duet campaigns, stitch videos, event coverage, brand voice consultation. Let's talk.</p>
+        <div class="price">Custom <span class="price-note">quote</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── RATE CARD ── -->
+<section class="rate-section">
+  <div class="container">
+    <div class="rate-card">
+      <h2>Rates</h2>
+      <p class="subtitle">Starting rates for emerging creators — flexible on packages</p>
+      <div class="rate-items">
+        <div class="rate-item">
+          <span class="name">Single UGC Video</span>
+          <span class="price">$150</span>
+        </div>
+        <div class="rate-item">
+          <span class="name">3-Video Pack</span>
+          <span class="price">$350</span>
+        </div>
+        <div class="rate-item">
+          <span class="name">Monthly Partnership</span>
+          <span class="price">$500/mo</span>
+        </div>
+        <div class="rate-item">
+          <span class="name">Custom / Campaign</span>
+          <span class="price">Let's talk</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CONTACT ── -->
+<section class="contact-section" id="contact">
+  <div class="container">
+    <div class="contact-card">
+      <h2>Let's Make Something</h2>
+      <p>Ready to create scroll-stopping content for your brand?<br/>I'm taking on 2-3 new partnerships per month.</p>
+      <a href="mailto:lonedigitalnighthawk@gmail.com" class="contact-email">
+        📩 lonedigitalnighthawk@gmail.com
+      </a>
+      <p style="margin-top:20px;font-size:12px;color:var(--muted)">
+        Response within 24h · Based in NYC area
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer class="footer">
+  <div class="container">
+    © 2026 Sherief · UGC Creator · @nowornevertypeoftime · Powered by OpenClaw OS
+  </div>
+</footer>
+
+</body>
+</html>
